@@ -15,7 +15,7 @@ Instructions and code for setting up a simple iOS Mobile Device Management (MDM)
  1. Checkout sources: git clone https://github.com/piscesdk/mdm-server.git
  2. Go into folder: cd mdm-server
  3. Initialize MDM server and generate required certificates (SERVER_IP is IP address of your host machine where MDM server will be started): ./scripts/make_certs.sh <SERVER_IP>
- 4. Get Push Certificate from Apple and move PushCert.pem file to ./server/ folder
+ 4. Get Push Certificate from Apple and move PushCert.pem file to ./scripts/ folder
  5. Initialize virtual machine and start MDM server: vagrant up
  6. The server should be reachable: https://SERVER_IP:8080
 
