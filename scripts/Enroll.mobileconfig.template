@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>AccessRights</key>
+			<integer>8191</integer>
+			<key>CheckInURL</key>
+			<string>https://<SERVER_IP>:8080/checkin</string>
+			<key>CheckOutWhenRemoved</key>
+			<true/>
+			<key>IdentityCertificateUUID</key>
+			<string>F85B1506-3E66-4A66-B6E3-4D5053C22903</string>
+			<key>PayloadDescription</key>
+			<string>Configures Mobile Device Management</string>
+			<key>PayloadDisplayName</key>
+			<string>Mobile Device Management</string>
+			<key>PayloadIdentifier</key>
+			<string>com.f5.mini-mdm.test.mdm</string>
+			<key>PayloadOrganization</key>
+			<string>F5 Client PD</string>
+			<key>PayloadType</key>
+			<string>com.apple.mdm</string>
+			<key>PayloadUUID</key>
+			<string>710878EF-6113-44AE-AF86-DEDFB84F64DA</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ServerURL</key>
+			<string>https://<SERVER_IP>:8080/server</string>
+			<key>SignMessage</key>
+			<true/>
+			<key>Topic</key>
+                        <string>com.apple.mgmt.External.7d20732f-1810-464c-bd29-1ccaf40e4cef</string>
+		</dict>
+		<dict>
+			<key>Password</key>
+			<string>123456</string>
+			<key>PayloadCertificateFileName</key>
+			<string>Identity.p12</string>
+			<key>PayloadContent</key>
+			<data><IDENTITY_P12></data>
+			<key>PayloadDescription</key>
+			<string>Provides device authentication (certificate or identity).</string>
+			<key>PayloadDisplayName</key>
+			<string>Identity.p12</string>
+			<key>PayloadIdentifier</key>
+			<string>com.f5.mini-mdm.test.credential</string>
+			<key>PayloadOrganization</key>
+			<string>F5 Client PD</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.pkcs12</string>
+			<key>PayloadUUID</key>
+			<string>F85B1506-3E66-4A66-B6E3-4D5053C22903</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Profile description.</string>
+	<key>PayloadDisplayName</key>
+	<string>Mini MDM Enrollment Profile</string>
+	<key>PayloadIdentifier</key>
+	<string>com.f5.mini-mdm.test</string>
+	<key>PayloadOrganization</key>
+	<string>F5 Client PD</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>11053390-94C2-4584-91A5-CA4E6C1A179A</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
