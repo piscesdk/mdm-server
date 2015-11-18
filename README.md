@@ -4,167 +4,21 @@ Instructions and code for setting up a simple iOS Mobile Device Management (MDM)
 
 # Prerequisites
 
- * Publicly accessible Linux/Unix server
+ * [Vagrant](https://www.vagrantup.com)
+ * Apple's PUSH certificate
  * Apple Enterprise Account
  * Apple Developer Account
- * Python 2.7 (See Server Setup for libraries)
  * openssl command-line
- * Java SDK (java/javac)
- * Apple's iPhone Configuration Utility
-    * [OS X Version](http://support.apple.com/kb/dl1465)
-    * [Windows Version](http://support.apple.com/kb/DL1466)
 
 # Setup
 
- 1. Create MDM Vendor CSR
-    * Open Keychain Access.
-    * Go to the menu bar: Keychain Access -> Certificate Assistant -> Request a Certificate From a Certificate Authority.
-    * Use the same email as the developer account that will be used.  Enter in a common name as well.
-    * Select *Saved to disk*.  
+ 1. Checkout sources: git clone https://github.com/piscesdk/mdm-server.git
+ 2. Go into folder: cd mdm-server
+ 3. Initialize MDM server and generate required certificates (SERVER_IP is IP address of your host machine where MDM server will be started): ./scripts/make_certs.sh <SERVER_IP>
+ 4. Get Push Certificate from Apple and move PushCert.pem file to ./server/ folder
+ 5. Initialize virtual machine and start MDM server: vagrant up
+ 6. The server should be reachable: https://SERVER_IP:8080
 
- 2. Upload CSR to Apple
-    * Go to [Apple's Certificates, Identifiers & Profiles page](https://developer.apple.com/account/ios/certificate/certificateCreate.action).
-    * Select MDM CSR under Production.  If this option is disabled, you will need to contact apple to enable it.  You can either email apple at devprograms@apple.com or go through the [online contact menu](http://developer.apple.com/contact/).  In your message, indicate that you are looking to create an MDM Vendor Certificate and need the MDM CSR option enabled on the certificate creation page.  Apple should respond within one business day according to their contact page.  
-    * When you have the MDM CSR option available, select it and hit continue.  Hit continue again through Apple's description of how to create a CSR file (we already have one).
-    * Upload the .certSigningRequest file we created in step 1 and then hit generate.  A .cer file should be downloaded. Name it something like mdmvendor.cer.
-
- 3. Export MDM private key
-    * Open your mdmvendor.cer file in Keychain Access.
-    * Select Certificates from the left side.
-    * You should find your certificate listed as *MDM Vendor: Common Name*.
-    * There should be an arrow on that line that opens up show the MDM private key.
-    * Right-click the private key, select *Export...*, and save as private.p12
-    * Remember where you save this file, we will use it in step 5.
-
- 4. Create Push Certificate CSR
-    * In Keychain Access, again select from the menu bar: Keychain Access -> Certificate Assistant -> Request a Certificate From a Certificate Authority.
-    * Enter your email (can be a different email) and a common name.
-    * Select *Saved to disk* and name it something like push.csr.
-
- 5. Extract MDM private key and MDM Vendor Certificate
-    * Extract private key using the following command:
-
-    openssl pkcs12 -in private.p12 -nocerts -out key.pem
-
-    * Strip the password from the private key using the following command:
-
-    openssl rsa -in key.pem out private.key
-
-    * Extract certificate using the following command:
-
-    openssl pkcs12 -in private.p12 -clcerts -nokeys -out cert.pem
-
-    * Convert certificate to DES using the following command:
-
-    openssl x509 -in cert.pem -inform PEM -out mdm.cer -outform DES
-
-    * These files will be used in the next step.
-
- 6. Use the mdmvendorsign tool to create applepush.csr
-    * We're going to use the python code located in /vendor/.  If /vendor/ is currently empty, you probably forgot to init and update submodules
-
-    git submodule init 
-    git submodule update
-    
-    * Copy private.key, push.csr, and mdm.cer into /vendor/
-
-    * Run the following command while in that directory:
-
-    python mdm_vendorpython mdm_vendor_sign.py –key private.key –csr push.csr –mdm mdm.cer –out applepush.csr
-
-    * This should generate applepush.csr.
-
- 7. Get Push Certificate from Apple
-    * Go to [Apple's Push Certificates Portal](https://identity.apple.com/pushcert/) and click the Create a Certificate button.
-    * Upload applepush.csr to create a new entry in the table.
-    * Download the resulting push certificate.
-    * Open the push certificate in Keychain Access.
-
- 8. Prepare Push Certificate
-    * Find the push certificate in Keychain Access.  It should look like *APSP:hexstuffhere*.
-    * Right-click the certificate and select *Get Info*.
-    * Copy down the User ID which should look like com.apple.mgmt.External.hexstuffhere...  We will use it later on in step 9.
-    * Right-click the certificate and select *Export...* and save it as mdm.p12
-    * Run the following command to convert it to a pem file:
-
-    openssl pkcs12 -in mdm.p12 -out PushCert.pem -nodes
-
-    * Move the resulting PushCert.pem file to /server/
-
- 9. Generate additional certs
-    * Go to the scripts directory and run make_certs.sh.
-    * This will generate a number of necessary certs to move forward.
-    * Certs will be automatically moved to their proper location in /server.
-    * We'll use identity.p12 in step 10 to create an Enroll.mobileconfig file
-
- 10. Create Enroll.mobileconfig
-    * Open the iPhone Configuration Utilities program, select *Configuration Profiles*, and then click the *New* button.
-    * In the General category: Pick a name to identify the cert.  For Identifier, use the com.apple.mgmt.External.hexstuffhere that you copied down earlier.
-    * In the Credentials category, click configure and find your scripts/identity.p12 file generated in step 9. For password, we either use the PEM password or the export password - if the profile does not install, try the other option.  Please leave feedback with which worked. 
-    * For Mobile Device Management:
-      * Server URL: https://YOUR_HOSTNAME_OR_IP:8080/server
-      * Check In URL: https://YOUR_HOSTNAME_OR_IP:8080/checkin
-      * Topic: com.apple.mgmt... string (same as General->Identifier)
-      * Identity: identity.p12
-      * Sign messages: Checked
-      * Check out when removed: Unchecked
-      * Query device for: Check all that you want
-      * Add / Remove: Check all that you want
-      * Security: Check all that you want
-      * Use Development APNS server: Uncheck
-    * When done, click Export.  Choose None for security and then Export....
-    * Save the file as **Enroll**.  You will now have an Enroll.mobileconfig file - move it to the /server directory.
-
- 11. Cleanup
-    * Any additional files that are not in /server/ generated during this process are not necessary for running the server.  Some of them may have/be private keys or other unique information, so it is probably a good idea to protect or destroy those files.
-    * Most certs will be located in the /scripts/ folder.  There may be some generated from Keychain Access that were saved by the user and may be saved elsewhere.
-    * Please secure these files and prevent others from being able to access them.
-
-NOTE: UPDATING CERTIFICATE INSTRUCTIONS - WORK IN PROGRESS
-
-
-# Server Setup
-
-The server code is based on and heavily takes from [Intrepidus Group's blackhat presentation](https://intrepidusgroup.com/).  Copy over the **mdm-server/server** directory you put the enrollment profile and certificates in to your server.
-
-You must have the following installed on the server:
-  * Openssl
-    * Recommend downloading and compiling yourself
-    * Some Debian-based distros disable features needed by M2Crypto
-    * Source available at [http://www.openssl.org/source/](http://www.openssl.org/source/)
-  * Python 2.7, with the following libraries
-     * [web.py](http://webpy.org/)
-     * [M2Crypto](https://pypi.python.org/pypi/M2Crypto)
-     * [PyOpenSSL](https://pypi.python.org/pypi/pyOpenSSL)
-     * [APNSWrapper](https://pypi.python.org/pypi/APNSWrapper)
-       * APNSWrapper appears to be inactive
-       * On 22 October 2014, [Apple removed support for SSLv3](https://developer.apple.com/news/?id=10222014a), which APNSWrapper uses, due to the poodle vulnerability
-       * As a temporary solution, users need to edit line 131 of connections.py of the source code of APNSWrapper
-       * Change "SSLv3" to "TLSv1", so that the line reads:
-       ```python
-         ssl_version = self.ssl_module.PROTOCOL_TLSv1,
-       ```
-       * After making the change, users should install the library using:
-
-       ```bash
-         python setup.py install
-       ```
-       
-       * More information will follow as we find a better solution
-
-Network Settings
-  * Outbound access to gateway.push.apple.com:2195
-  * Inbound access to port 8080
-  * iOS device must also have outbound access to gateway.push.apple.com:5223
-
-If everything is setup appropriately, simply navigate to the **/server** directory and run <code>python server.py</code>.
-
-On the device navigate to: **https://YOUR_HOST:8080/**
-Once there you need to, in order: 
- 1. Tap *here* to install the CA Cert (for Server/Identity)
- 2. Tap *here* to enroll in MDM (the device should appear after this step) 
- 3. Select Command (DeviceLock is a good one to test) and check your device.  Click Submit to send the command.
- 4. If everything works, the device should lock and you're good to go!  As of right now some of the commands aren't fully implemented.  Feel free to experiment with different commands!
 
 ---
 ![Device Enrollment Steps](images/deviceEnroll.jpg)

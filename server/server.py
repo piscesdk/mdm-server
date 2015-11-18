@@ -172,8 +172,8 @@ def setup_commands():
 #        )
 #    )
 #
-    if 'Example.mobileconfig' in os.listdir('.'):
-        my_test_cfg_profile = open('Example.mobileconfig', 'rb').read()
+    if 'Enroll.mobileconfig' in os.listdir('.'):
+        my_test_cfg_profile = open('Enroll.mobileconfig', 'rb').read()
         pl = readPlistFromString(my_test_cfg_profile)
 
         ret_list['InstallProfile'] = dict(
@@ -191,7 +191,7 @@ def setup_commands():
         )
 
     else:
-        print "Can't find Example.mobileconfig in current directory."
+        print "Can't find Enroll.mobileconfig in current directory."
 
 
     if 'MyApp.mobileprovision' in os.listdir('.'):
