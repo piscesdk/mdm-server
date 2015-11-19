@@ -1,0 +1,4 @@
+131c131
+<                     ssl_version = self.ssl_module.PROTOCOL_SSLv3,
+---
+>                     ssl_version = self.ssl_module.PROTOCOL_TLSv1,
