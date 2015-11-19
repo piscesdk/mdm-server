@@ -63,6 +63,7 @@ Vagrant.configure(2) do |config|
     sudo pip install web.py
     sudo pip install uuid
     sudo pip install APNSWrapper
+    sudo patch /usr/local/lib/python2.7/dist-packages/APNSWrapper/connection.py /vagrant/apns.patch 
     sudo pip install M2Crypto
     # start mdm server
     sudo cp /vagrant/mdm.conf /etc/init/
