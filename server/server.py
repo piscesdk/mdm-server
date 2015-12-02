@@ -44,6 +44,7 @@ from M2Crypto import SMIME, X509, BIO
 
 # Global variable setup
 LOGFILE = 'xactn.log'
+VPN_UUID = '9F658A35-2B0F-4D5E-872D-61A9130FE882'
 
 # Dummy socket to get the hostname
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -115,7 +116,7 @@ urls = (
 
 def setup_commands():
     # Function to generate dictionary of valid commands
-    global my_test_provisioning_uuid
+    global VPN_UUID
 
     ret_list = dict()
 
@@ -208,7 +209,7 @@ def setup_commands():
             Command = dict(
                 RequestType = 'RemoveProvisioningProfile',
                 # need an ASN.1 parser to snarf the UUID out of the signed profile
-                UUID = my_test_provisioning_uuid
+                UUID = VPN_UUID
             )
         )
 
@@ -248,6 +249,39 @@ def setup_commands():
         RequestType = 'RemoveApplication',
         Identifier = 'mitre.managedTest',
     ))
+
+# Install Chrome
+    ret_list['InstallApplication - Chrome'] = dict(
+    Command = dict(
+        RequestType = 'InstallApplication',
+       # ManagementFlags = 4,  # do not delete app when unenrolling from MDM
+        ManagementFlags = 5,  # remove app when profile is removed, prevent iCloud backup
+        iTunesStoreID = 535886823,  # Dolphin
+        Attributes = dict(
+                        VPNUUID = VPN_UUID
+                        )
+    ))
+
+# Per-App VPN payload
+    if 'PerAppVPN.mobileconfig' in os.listdir('.'):
+        my_test_cfg_profile = open('PerAppVPN.mobileconfig', 'rb').read()
+        pl = readPlistFromString(my_test_cfg_profile)
+
+        ret_list['InstallProfile_PerAppVPN (iOS 7)'] = dict(
+            Command = dict(
+                RequestType = 'InstallProfile',
+                Payload = Data(my_test_cfg_profile)
+            )
+        )
+
+        ret_list['RemoveProfile_PerAppVPN (iOS 7)'] = dict(
+            Command = dict(
+                RequestType = 'RemoveProfile',
+                Identifier = pl['PayloadIdentifier']
+            )
+        )
+    else:
+        print "Can't find PerAppVPN.mobileconfig in current directory."
 
 #
 # on an ipad, you'll likely get errors for the "VoiceRoaming" part.
