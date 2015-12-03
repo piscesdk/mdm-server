@@ -250,6 +250,17 @@ def setup_commands():
         Identifier = 'mitre.managedTest',
     ))
 
+# Install Dolphin
+    ret_list['InstallApplication - Dolphin'] = dict(
+    Command = dict(
+        RequestType = 'InstallApplication',
+        ManagementFlags = 5,  # remove app when profile is removed, prevent iCloud backup
+        iTunesStoreID = 452204407,  # Dolphin
+        Attributes = dict(
+                        VPNUUID = VPN_UUID
+                        )
+    ))
+
 # Install Chrome
     ret_list['InstallApplication - Chrome'] = dict(
     Command = dict(
